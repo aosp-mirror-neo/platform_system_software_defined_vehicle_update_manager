@@ -1,0 +1,65 @@
+// Copyright (C) 2026 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+apex {
+    name: "com.sdv.google.update_manager",
+    manifest: "apex_manifest.json",
+    key: "com.sdv.google.update_manager.key",
+    file_contexts: "file_contexts",
+    prebuilts: [
+        // SDV service bundles manifest file.
+        "com.sdv.google.update_manager.manifest",
+        // Update manager ACL policy file.
+        "com.sdv.google.update_manager.acl_policy",
+    ],
+    system_ext_specific: true,
+    updatable: false,
+}
+
+apex_key {
+    name: "com.sdv.google.update_manager.key",
+    public_key: "com.sdv.google.update_manager.avbpubkey",
+    private_key: "com.sdv.google.update_manager.pem",
+}
+
+// Update manager SDV service bundles manifest file prebuilt.
+prebuilt_etc {
+    name: "com.sdv.google.update_manager.manifest",
+    // The source name of the manifest file.
+    src: "sdv_service_bundles_manifest.textproto",
+    // The name of the installed file shall be `sdv_service_bundles_manifest.textproto`.
+    filename: "sdv_service_bundles_manifest.textproto",
+    // Disable direct installation of the manifest to one of the partitions.
+    // The manifest will be used only inside of service bundles registry apexes.
+    installable: false,
+    // Reduce prebuilt visibility to avoid adding it in another APEX.
+    visibility: ["//visibility:private"],
+}
+
+// File with the ACL policy of service bundle is stored in the apex.
+prebuilt_etc {
+    name: "com.sdv.google.update_manager.acl_policy",
+    // The source name of the manifest file.
+    src: "acl.textproto",
+    filename: "acl.textproto",
+    // Disable direct installation of the manifest to one of the partitions.
+    // The manifest will be used only inside of service bundles registry apexes.
+    installable: false,
+    // Reduce prebuilt visibility to avoid adding it in another APEX.
+    visibility: ["//visibility:private"],
+}

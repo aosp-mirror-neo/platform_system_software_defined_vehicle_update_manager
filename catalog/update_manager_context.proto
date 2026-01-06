@@ -1,0 +1,127 @@
+/*
+ * Copyright (C) 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Internal protos used to save the state of the Update Manager to disk.
+ * This is not expected to be used by clients. */
+
+syntax = "proto3";
+
+package com.sdv.google.update_manager;
+
+import "failure_reason.proto";
+import "update_state.proto";
+
+// Non-public copy of the message found in payload.proto
+message SystemUpdatePayload {
+  /* Absolute path to the update image (eg. /updates/ota_update.zip) */
+  string payload = 1;
+
+  /* Offset (in bytes) into the payload where the payload binary starts.
+   *
+   * This must be a non-negative value. A negative value will return an error.
+   */
+  int64 payload_offset = 2;
+
+  /* The amount of data (in bytes) to read from "payload" as the update payload,
+   * starting from "payload offset". 0 can be supplied, in which case the
+   * payload size will be auto-detected.
+   *
+   * This must be a non-negative value. A negative value will return an error.
+   */
+  int64 payload_size = 3;
+
+  /* The header key value pairs to apply with the payload. The available
+   * headers are defined by the UpdateEngine service in the following file:
+   * https://cs.android.com/android/_/android/platform/system/update_engine/+/8ab0f410667a6a1f1a844ae426c2da34d80ddb10:common/constants.h;l=160-202;drc=0215aa7b064479e5aa957f8ba657564b279e0869;bpv=0;bpt=0
+   */
+  map<string, string> header_key_value_pairs = 4;
+}
+
+// Non-public copy of the message found in payload.proto
+message ServiceBundleUpdatePayload {
+  /* Absolute path to an .apex file.
+   * Multiple .apex files can be included in a single service bundle update by
+   * repeating this field. */
+  repeated string apex_path = 1;
+
+  /* Depending on the failure, the system may reboot if the update fails
+   * to activate correctly. Each boot will decrement the boot attempts
+   * remaining until none are left, in which case the update is aborted.
+   * This value sets the number of boots to attempt activation before aborting.
+   *
+   * This value must be greater than 0. A value less than or equal to 0 will
+   * return an error. */
+  int32 boot_attempts = 2;
+}
+
+message ApexChildSession {
+  /* Path to the original APEX before it was staged */
+  string apex_path = 1;
+  /* The child session id for this APEX.
+   *
+   * The ApexService uses an int32 type. 0 is an invalid id. Negative values are
+   * technically valid ids, however the Update Manager will only use positive
+   * values.*/
+  int32 session_id = 2;
+}
+
+message ApexInfo {
+  /* The module name of the APEX */
+  string module_name = 1;
+  /* The version code of the APEX */
+  int64 version_code = 2;
+}
+
+message ServiceBundleUpdateMetadata {
+  /* All APEX child sessions that are included in this update */
+  repeated ApexChildSession apex_child_sessions = 1;
+  /* The parent session id, used to submit and (potentially) revert the update
+   * atomically.
+   *
+   * The ApexService uses an int32 type. 0 is an invalid id. Negative values are
+   * technically valid ids, however the Update Manager will only use positive
+   * values.*/
+  int32 parent_session_id = 2;
+  /* The number of boot attempts to make when applying the update if a failure
+   * occurs. This value is passed into IVold::startCheckpoint().
+   *
+   * This value must will always be greater than 0. */
+  int32 boot_attempts = 3;
+  repeated ApexInfo submitted_apex_info = 4;
+}
+
+message SystemUpdateMetadata {
+  /* The system update payload */
+  SystemUpdatePayload payload = 1;
+  /* The boot slot from which the update was started.
+   *
+   * The BootControlService uses an int32 type, however negative values are
+   * invalid. */
+  int32 initial_boot_slot = 2;
+}
+
+message UpdateManagerContext {
+  /* The state of the Update Manager */
+  UpdateState state = 1;
+  /* The metadata for the update, depending on the update type */
+  oneof metadata {
+    SystemUpdateMetadata system_update_metadata = 2;
+    ServiceBundleUpdateMetadata service_bundle_update_metadata = 3;
+  }
+  /* This is included for failure states to provide details about the error that
+   * occurred */
+  FailureReason failure_reason = 4;
+}

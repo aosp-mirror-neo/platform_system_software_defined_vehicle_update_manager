@@ -1,0 +1,55 @@
+/*
+ * Copyright (C) 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package com.sdv.google.update_manager.client;
+
+import "update_manager_status.proto";
+
+service UpdateManagerListenerService {
+  /* Called when there is a status update from the Update Manager.
+   *
+   * This must be implemented by all services that call
+   * "SubscribeToStatusUpdates()" on the UpdateManagerService. */
+  rpc OnStatusUpdate(OnStatusUpdateRequest) returns (OnStatusUpdateResponse) {}
+}
+
+/* This message has the same format as the IUpdateEngineCallback::onStatusUpdate
+ * parameters. */
+message UpdateProgress {
+  /* Matches the enum UpdateStatus in the following Android source file:
+   * https://cs.android.com/android/platform/superproject/main/+/main:system/update_engine/client_library/include/update_engine/update_status.h
+   */
+  int32 status_code = 1;
+
+  /* A value ranging from 0.0 to 1.0, 0.0 representing no progress and 1.0
+   * representing the process is complete. */
+  float percentage = 2;
+}
+
+message OnStatusUpdateRequest {
+  /* A status update can either be an UpdateManagerStatus or an UpdateProgress
+   * message. UpdateManagerStatus is sent when the state has changed.
+   * UpdateProgress is sent during system updates to indicate the update
+   * progress. */
+  oneof status_update {
+    UpdateManagerStatus update_manager_status = 1;
+    UpdateProgress update_progress = 2;
+  }
+}
+
+message OnStatusUpdateResponse {}

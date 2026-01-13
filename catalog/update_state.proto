@@ -1,0 +1,59 @@
+/*
+ * Copyright (C) 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package com.sdv.google.update_manager;
+enum UpdateState {
+  /* The Update Manager is ready to accept a new update. */
+  READY = 0;
+  /* An update is being prepared. */
+  PREPARE = 1;
+  /* The update failed during the prepare step. Rollback the update to start a
+   * new update. */
+  PREPARE_FAILURE = 2;
+  /* The update was prepared successfully. */
+  PREPARE_COMPLETE = 3;
+  /* A rollback has started from the prepare step. When complete, transitions
+   * to READY. */
+  PREPARE_ROLLBACK = 4;
+  /* The prepared update is being activated. */
+  ACTIVATE_PRE_REBOOT = 5;
+  /* The update failed during the activate step before the reboot. Rollback the
+   * update to start a new update. */
+  ACTIVATE_PRE_REBOOT_FAILURE = 6;
+  /* The update was activated successfully. Reboot to complete activation. */
+  ACTIVATE_PRE_REBOOT_COMPLETE = 7;
+  /* A rollback has started from the activate pre-reboot step. When complete,
+   * transitions to READY. */
+  ACTIVATE_PRE_REBOOT_ROLLBACK = 8;
+  /* An update was successfully activated after the reboot. The update needs to
+   * be committed or rolled back in order to be completed. */
+  ACTIVATE_POST_REBOOT_COMPLETE = 9;
+  /* A rollback has started from the activate post-reboot step. */
+  ACTIVATE_POST_REBOOT_ROLLBACK = 10;
+  /* The rollback was completed successfully. Reboot to complete the
+   * rollback. */
+  ACTIVATE_POST_REBOOT_ROLLBACK_COMPLETE = 11;
+  /* The update is being committed. When complete, transitions to READY */
+  COMMIT = 12;
+  /* The prepare request is being cancelled */
+  PREPARE_CANCEL = 13;
+  /* The system update has started suspending  */
+  PREPARE_SUSPEND = 14;
+  /* The system update has finished suspending */
+  PREPARE_SUSPEND_COMPLETE = 15;
+}

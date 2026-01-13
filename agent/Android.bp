@@ -1,0 +1,98 @@
+// Copyright (C) 2026 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+    default_team: "trendy_team_automotive",
+}
+
+rust_defaults {
+    name: "sdv_update_manager_agent@rust_defaults",
+    defaults: [
+        "sdv@rust_defaults",
+        "sdv_tracing@rust_defaults",
+    ],
+    crate_name: "sdv_update_manager_agent",
+    rustlibs: [
+        "apex_aidl_interface-rust",
+        "android.hardware.boot-V1-rust",
+        "google.sdv.vpm-V1-rust",
+        "libapkverify",
+        "libbinder_rs",
+        "libbinder_tokio_rs",
+        "libcom_sdv_google_update_manager_client_update_manager_listener_service_rpc_rs",
+        "libcom_sdv_google_update_manager_update_manager_service_rpc_rs",
+        "libfutures",
+        "liblogger",
+        "liblog_rust",
+        "libmockall",
+        "libpersistent_binder",
+        "libprotobuf",
+        "librand",
+        "librustutils",
+        "libsdv_log_rust",
+        "libsdv_status_rs",
+        "libsdv_comms_ctx_impl",
+        "libsdv_comms_rs",
+        "libsdv_mw_rs_comms",
+        "libsdv_mw_rs_sdv_comms",
+        "libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent",
+        "libtokio",
+        "libtokio_stream",
+        "libupdate_engine_aidl_interface-rust",
+        "libupdate_manager_api",
+        "libzip",
+    ],
+    proc_macros: [
+        "libasync_trait",
+    ],
+    ld_flags: ["-Wl,--no-as-needed"],
+}
+
+rust_binary {
+    name: "sdv_update_manager_agent",
+    apex_available: [
+        "//apex_available:platform",
+    ],
+    defaults: [
+        "sdv_update_manager_agent@rust_defaults",
+    ],
+    srcs: [
+        "src/main.rs",
+    ],
+    prefer_rlib: true,
+    system_ext_specific: true,
+}
+
+rust_test {
+    name: "sdv_update_manager_agent_unit_tests",
+    defaults: [
+        "sdv_update_manager_agent@rust_defaults",
+    ],
+    srcs: [
+        "src/main.rs",
+    ],
+    rustlibs: [
+        "libgoogletest_rust",
+        "libtempfile",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+    test_suites: [
+        "automotive-sdv-tests",
+        "general-tests",
+    ],
+    data: ["test_data/*"],
+}

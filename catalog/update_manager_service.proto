@@ -1,0 +1,280 @@
+/*
+ * Copyright (C) 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package com.sdv.google.update_manager;
+
+import "payload.proto";
+import "update_manager_status.proto";
+
+/* The Update Manager is a service that updates the system, either by updating
+ * the partitions or by updating APEXes. An update that updates the partitions
+ * is called a "system update" and an update that updates APEXes is called a
+ * "service bundle update".
+ *
+ * The service is driven by a state machine that is used to track the different
+ * steps of the update. There are also failure states that are used to indicate
+ * any errors that occur during the update process.
+ *
+ * The Update Manager's state can be monitored by subscribing to status
+ * updates with the SubscribeToStatusUpdates() request. A client can unsubscribe
+ * from status updates by calling UnsubscribeFromStatusUpdates(). The status can
+ * be retrieved at any time by calling GetStatus().
+ *
+ * The Prepare(), Activate(), Rollback(), and Commit() requests all return
+ * an immediate successful response if the request has been accepted. If the
+ * request contains an invalid argument, or if the request is not expected
+ * during the current state, an error is returned immediately without modifying
+ * the state. The requested actions are only complete once the Update Manager
+ * has transitioned to a completion state. Please see each request's
+ * documentation for details about the possible completion states.
+ */
+service UpdateManagerService {
+  /* Subscribe for callbacks when the Update Manager's status changes.
+   *
+   * Callers of this must implement the UpdateManagerListenerService interface.
+   *
+   * Before this function returns, the Update Manager will call OnStatusUpdate()
+   * on the subscriber. It will send an OnStatusUpdateRequest with a
+   * status_update of type UpdateManagerStatus with the current state of the
+   * Update Manager. If the client does not return Ok (or does not handle the
+   * request at all), the client will not be subscribed to status updates.
+   *
+   * If a currently subscribed client calls this again, the Update Manager will
+   * call OnStatusUpdate() on the subscriber with the same payload as described
+   * above. If the client does not return Ok (or does not handle the request at
+   * all), then the client will still remain subscribed. */
+  rpc SubscribeToStatusUpdates(SubscribeToStatusUpdatesRequest)
+      returns (SubscribeToStatusUpdatesResponse) {}
+
+  /* Unsubscribe from status update callbacks. */
+  rpc UnsubscribeFromStatusUpdates(UnsubscribeFromStatusUpdatesRequest)
+      returns (UnsubscribeFromStatusUpdatesResponse) {}
+
+  /* Get the status of the Update Manager. */
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse) {}
+
+  /* Prepare an update so it can be activated at a later time.
+   *
+   * An error may be returned immediately if an argument is invalid or the
+   * Update Manager is in an invalid state to handle a Prepare() request.
+   *
+   * If it succeeds, the state transitions to "PREPARE_COMPLETE". The next
+   * expected request in this state is either Activate() or Rollback().
+   *
+   * If it fails, the state transitions to "PREPARE_FAILED". Call Rollback() to
+   * reset the update. */
+  rpc Prepare(PrepareRequest) returns (PrepareResponse) {}
+
+  /* Activate a previously prepared update.
+   *
+   * An error may be returned immediately if an argument is invalid or the
+   * Update Manager is in an invalid state to handle an Activate() request.
+   *
+   * An Activate request takes place in two parts: pre and post reboot.
+   * When Activate() is first called, it will complete the pre-reboot steps.
+   *
+   * If it succeeds, the state transitions to "ACTIVATE_PRE_REBOOT_COMPLETE".
+   *
+   * If it fails, the state transitions to "ACTIVATE_PRE_REBOOT_FAILED". Call
+   * Rollback() to reset the update.
+   *
+   * After reaching "ACTIVATE_PRE_REBOOT_COMPLETE", reboot the system to
+   * continue the activation process.
+   *
+   * If the update activates successfully after the reboot, the state will
+   * transition to "ACTIVATE_POST_REBOOT_COMPLETE". The next expected request
+   * in this state is either Rollback() or Commit().
+   *
+   * If a system update fails to activate, the system will reboot several
+   * times before automatically reverting to the original system.
+   *
+   * If a service bundle update fails to activate, the updated APEXes will
+   * be dropped and the original APEXes will be reactivted.
+   *
+   * For both update types, this failure is indicated when the state
+   * transitions to "ACTIVATE_PRE_REBOOT_FAILURE". Call Rollback() to reset the
+   * update.
+   */
+  rpc Activate(ActivateRequest) returns (ActivateResponse) {}
+
+  /* Commit the update. Once committed, an update cannot be rolled back.
+   *
+   * An error may be returned immediately if an argument is invalid or the
+   * Update Manager is in an invalid state to handle a Commit() request.
+   *
+   * The commit is complete once the state transitions to "READY". */
+  rpc Commit(CommitRequest) returns (CommitResponse) {}
+
+  /* Rollback the update.
+   *
+   * An error may be returned immediately if an argument is invalid or the
+   * Update Manager is in an invalid state to handle a Rollback() request.
+   *
+   * A rollback from the "PREPARE" and "PREPARE_SUSPEND_COMPLETE" states is
+   * supported only for system updates. If requested, the state transitions to
+   * "PREPARE_CANCEL". When the update has been cancelled, the state transitions
+   * to "PREPARE_ROLLBACK" to complete the rollback. When the rollback is
+   * complete, the state transitions to "READY". NOTE: when requesting a
+   * rollback from the "PREPARE" state, there is a race condition where the
+   * update may complete before the Rollback() request is received. If this
+   * occurs, the state will not transition to "PREPARE_CANCEL" but instead
+   * proceed directly to "PREPARE_ROLLBACK", followed by "READY" when the
+   * rollback is complete.
+   *
+   * A rollback from "PREPARE_FAILED" or "PREPARE_COMPLETE" states will
+   * transition to "PREPARE_ROLLBACK" while in progress and to "READY" when
+   * completed.
+   *
+   * A rollback from "ACTIVATE_PRE_REBOOT_*" states will transition to
+   * "ACTIVATE_PRE_REBOOT_ROLLBACK" while in progress and to "READY" when
+   * completed.
+   *
+   * A rollback from "ACTIVATE_POST_REBOOT_*" states will transition to
+   * "ACTIVATE_POST_REBOOT_ROLLBACK" while in progress and to
+   * "ACTIVATE_POST_REBOOT_ROLLBACK_COMPLETE" when completed. A reboot is
+   * necessary is to complete the rollback. After the reboot and the rollback
+   * completes, the state will transition to "READY". */
+  rpc Rollback(RollbackRequest) returns (RollbackResponse) {}
+
+  /* Uninstalls the /data version of APEXes.
+   * The VM should be rebooted for the uninstall to take effect.
+   * Please note that this API **doesn't**
+   * 1. remove pre-installed APEX
+   * 2. wipe apex data
+   * 3. remove non-active version of APEX
+   */
+  rpc UninstallApex(UninstallApexRequest) returns (UninstallApexResponse) {}
+
+  /* Suspend the update.
+   *
+   * Suspending the update will temporarily pause the update process. The
+   * suspend has completed when the state transitions to
+   * "PREPARE_SUSPEND_COMPLETE".
+   *
+   * This is only supported for system updates. This request is only valid when
+   * sent while in the "PREPARE" state. If this request is sent in any other
+   * state, a "FailedPrecondition" error is returned and the Update Manager will
+   * not take any action.
+   *
+   * NOTE: when requesting to suspend the update from the "PREPARE" state, there
+   * is a race condition where the update may complete after the Suspend()
+   * request is received. If this occurs, the state may transition to
+   * "PREPARE_SUSPEND" followed by "PREPARE_SUSPEND_COMPLETE", but it will
+   * ultimately transition to "PREPARE_COMPLETE".
+   *
+   * If the VM is rebooted while the update is suspended, the state will remain
+   * at "PREPARE_SUSPEND_COMPLETE". The update can still be resumed, but some
+   * operations may be duplicated as indicated by the UpdateProgress messages
+   * sent through callbacks. It is the client's responsibility to ensure the
+   * update payload remains available at the original location on the filesystem
+   * throughout this process.
+   *
+   * The update will remain suspended until a Resume() request is received.
+   * There is no time limit on how long an update can remain suspended.
+   *
+   * It's also possible to cancel a suspended update by sending a Rollback()
+   * request. The Update Manager will transition from "PREPARE_SUSPEND_COMPLETE"
+   * to "PREPARE_CANCEL". Please see the documentation for the Rollback()
+   * request for further details on the "PREPARE_CANCEL" state.
+   */
+  rpc Suspend(SuspendRequest) returns (SuspendResponse) {}
+
+  /* Resume the update.
+   *
+   * This is only supported for system updates. This request is only valid when
+   * sent while in the "PREPARE_SUSPEND_COMPLETE" state. If this request is sent
+   * in any other state, a "FailedPrecondition" error is returned and the Update
+   * Manager will not take any action.
+   *
+   * The update will resume by transitioning back to the "PREPARE" state.
+   *
+   * NOTE: if the Update Manager is in the "PREPARE" state and the VPM indicates
+   * the VM is being suspended to RAM, suspended to disk, or powered off, the
+   * update will be suspended. It is the client's responsibility to send a
+   * Resume() request to resume the update at an appropriate time once the VM
+   * has resumed/restarted. */
+  rpc Resume(ResumeRequest) returns (ResumeResponse) {}
+}
+
+message SubscribeToStatusUpdatesRequest {}
+
+message SubscribeToStatusUpdatesResponse {}
+
+message UnsubscribeFromStatusUpdatesRequest {}
+
+message UnsubscribeFromStatusUpdatesResponse {}
+
+message GetStatusRequest {}
+
+message GetStatusResponse {
+  /* The status of the Update Manager */
+  UpdateManagerStatus update_manager_status = 1;
+  /* The current update payload, if one has been set through the Prepare()
+   * request */
+  oneof payload {
+    SystemUpdatePayload system_update_payload = 2;
+    ServiceBundleUpdatePayload service_bundle_update_payload = 3;
+  }
+}
+
+message PrepareRequest {
+  /* The payload for the update.
+   *
+   * The type of the payload determines the update type. A SystemUpdatePayload
+   * will start a system update (partition-based). A ServiceBundleUpdatePayload
+   * will start a service bundle update (APEX-based). */
+  oneof payload {
+    SystemUpdatePayload system_update_payload = 1;
+    ServiceBundleUpdatePayload service_bundle_update_payload = 2;
+  }
+}
+
+message PrepareResponse {}
+
+message ActivateRequest {}
+
+message ActivateResponse {}
+
+message CommitRequest {}
+
+message CommitResponse {}
+
+message RollbackRequest {}
+
+message RollbackResponse {}
+
+message UninstallApexRequest {
+  message ApexInfo {
+    // The name defined in APEX manifest file.
+    string module_name = 1;
+
+    // The version defined in APEX manifest file.
+    int64 version_code = 2;
+  }
+  repeated ApexInfo apexes = 1;
+}
+
+message UninstallApexResponse {}
+
+message SuspendRequest {}
+
+message SuspendResponse {}
+
+message ResumeRequest {}
+
+message ResumeResponse {}

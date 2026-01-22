@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# proto-file: //system/software_defined_vehicle/core_services/tools/regenerator/proto/catalog.proto
+# proto-file: //system/software_defined_vehicle/tools/regenerator/proto/catalog.proto
 # proto-message: Catalog
 # This is the catalog update file for the SDV Update Manager
 

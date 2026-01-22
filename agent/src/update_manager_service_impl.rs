@@ -927,6 +927,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
 
@@ -1276,7 +1277,39 @@ mod tests {
     #[tokio::test]
     async fn test_get_status_succeeds() {
         let temp_dirs = TempDirs::new();
-        let (ctx, init) = TestContext::new_with_mocks(temp_dirs.as_temp_paths());
+        let mut mock_services = MockServices::new();
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+        let (ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
+        let service_impl = UpdateManagerServiceImpl::new_with_paths(
+            init,
+            temp_dirs.ota_package.path(),
+            &ctx.save_state_path,
+        )
+        .await
+        .unwrap();
+
+        let result = UpdateManagerService::GetStatus(
+            &service_impl,
+            make_service_fqin(),
+            &GetStatusRequest::default(),
+        )
+        .await;
+
+        assert!(result.is_ok());
+        let response = result.unwrap();
+        assert_eq!(response.update_manager_status.update_state.unwrap(), ApiUpdateState::READY);
+    }
+
+    #[tokio::test]
+    async fn test_fail_to_mark_boot_complete_get_status_succeeds() {
+        let temp_dirs = TempDirs::new();
+        let mut mock_services = MockServices::new();
+        mock_services
+            .apex_service
+            .expect_mark_boot_successful()
+            .times(1)
+            .returning(|| Err(SdvStatus::new(SdvStatusCode::Internal)));
+        let (ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
             init,
             temp_dirs.ota_package.path(),
@@ -1300,7 +1333,9 @@ mod tests {
     #[tokio::test]
     async fn test_subscribe_to_status_updates_succeeds() {
         let temp_dirs = TempDirs::new();
-        let (mut ctx, init) = TestContext::new_with_mocks(temp_dirs.as_temp_paths());
+        let mut mock_services = MockServices::new();
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+        let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
             init,
             temp_dirs.ota_package.path(),
@@ -1315,7 +1350,9 @@ mod tests {
     #[tokio::test]
     async fn test_unsubscribe_from_status_updates_succeeds() {
         let temp_dirs = TempDirs::new();
-        let (mut ctx, init) = TestContext::new_with_mocks(temp_dirs.as_temp_paths());
+        let mut mock_services = MockServices::new();
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+        let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
             init,
             temp_dirs.ota_package.path(),
@@ -1340,7 +1377,9 @@ mod tests {
     async fn test_system_update_prepare_with_relative_payload_path_fails() {
         // GIVEN that a system update with a relative payload path is present on the system
         let temp_dirs = TempDirs::new();
-        let (mut ctx, init) = TestContext::new_with_mocks(temp_dirs.as_temp_paths());
+        let mut mock_services = MockServices::new();
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+        let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
             init,
             temp_dirs.ota_package.path(),
@@ -1384,6 +1423,7 @@ mod tests {
             .expect_get_current_slot()
             .times(1)
             .returning(|| Ok(/* initial_boot_slot=*/ 1));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -1430,6 +1470,7 @@ mod tests {
             .expect_get_current_slot()
             .times(1)
             .returning(|| Ok(/* initial_boot_slot=*/ 1));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -1476,6 +1517,7 @@ mod tests {
             .expect_get_current_slot()
             .times(1)
             .returning(|| Ok(/* initial_boot_slot=*/ 1));
+        mock_services.apex_service.expect_mark_boot_successful().times(2).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -1758,6 +1800,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -1862,6 +1905,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -1962,6 +2006,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -2090,6 +2135,7 @@ mod tests {
             .withf(|&slot| slot == 1) // Expect argument to be 1
             .times(1)
             .returning(|_| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(2).returning(|| Ok(()));
 
         let temp_dirs = TempDirs::new();
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
@@ -2189,6 +2235,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         {
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
@@ -2313,6 +2360,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         {
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
@@ -2443,7 +2491,8 @@ mod tests {
     async fn test_service_bundle_prepare_with_invalid_boot_attempts_fails() {
         // GIVEN that a service bundle update with 0 boot attempts is present on the system
         let temp_dirs = TempDirs::new();
-        let mock_services = MockServices::new();
+        let mut mock_services = MockServices::new();
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -2493,8 +2542,8 @@ mod tests {
     async fn test_service_bundle_update_with_relative_apex_path_prepare_fails() {
         // GIVEN that a service bundle update with a relative APEX path is present on the system
         let temp_dirs = TempDirs::new();
-        let mock_services = MockServices::new();
-
+        let mut mock_services = MockServices::new();
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
         let (mut ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
             init,
@@ -2536,6 +2585,7 @@ mod tests {
         const EXPECTED_SESSION_ID: i32 = 1;
         let expected_child_session_ids = vec![2];
 
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
         mock_services
             .apex_service
             .expect_submit_staged_session()
@@ -2640,7 +2690,8 @@ mod tests {
     async fn test_service_bundle_update_prepare_fails_with_bad_signed_apex() {
         // GIVEN that an invalid service_bundle update (caused by a bad signed APEX)
         // is present on the system
-        let mock_services = MockServices::new();
+        let mut mock_services = MockServices::new();
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let temp_dirs = TempDirs::new();
 
@@ -2734,6 +2785,8 @@ mod tests {
             .times(1)
             .withf(move |retry| *retry == SERVICE_BUNDLE_UPDATE_RETRIES)
             .returning(|_| Ok(()));
+
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let temp_dirs = TempDirs::new();
 
@@ -2847,6 +2900,8 @@ mod tests {
             .times(1)
             .withf(move |retry| *retry == SERVICE_BUNDLE_UPDATE_RETRIES)
             .returning(|_| Ok(()));
+
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         {
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
@@ -2962,6 +3017,8 @@ mod tests {
         let mut mock_services = MockServices::new();
         const EXPECTED_SESSION_ID: i32 = 1;
         let expected_child_session_ids = vec![2];
+
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         mock_services
             .apex_service
@@ -3140,6 +3197,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         {
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
@@ -3265,6 +3323,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         {
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
@@ -3353,6 +3412,8 @@ mod tests {
             .times(1)
             .returning(|_| Ok(true));
 
+        new_mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+
         let (ctx, init) = TestContext::new(temp_paths.clone(), new_mock_services);
         let service_impl =
             UpdateManagerServiceImpl::new_with_paths(init, &ota_package_path, &ctx.save_state_path)
@@ -3391,6 +3452,7 @@ mod tests {
             .expect_power_state_report_processing_complete()
             .times(1)
             .returning(|| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         {
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
@@ -3534,6 +3596,8 @@ mod tests {
             .withf(move |retry| *retry == SERVICE_BUNDLE_UPDATE_RETRIES)
             .returning(|_| Ok(()));
 
+        mock_services.apex_service.expect_mark_boot_successful().times(2).returning(|| Ok(()));
+
         mock_services.apex_service.expect_revert_active_sessions().times(1).returning(|| Ok(()));
         mock_services
             .vold_service
@@ -3643,6 +3707,7 @@ mod tests {
             .withf(move |paths| paths[0] == module_path)
             .times(1)
             .returning(|_| Ok(()));
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -3686,6 +3751,7 @@ mod tests {
             .returning(|_| {
                 Err(SdvStatus::with_message(SdvStatusCode::NotFound, "uninstall apex failed"))
             });
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -3715,6 +3781,7 @@ mod tests {
         let mut mock_services = MockServices::new();
         let module_name = String::from("any.name");
         let version_code = 1;
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
         mock_services
             .apex_service
             .expect_get_active_packages()
@@ -3756,6 +3823,7 @@ mod tests {
             version_code,
             module_path.clone(),
         );
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
         let (ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -3788,6 +3856,7 @@ mod tests {
         let module_path = String::from("some/random/path");
         fake_active_apex(&mut mock_services, module_name.clone(), 100, module_path.clone());
 
+        mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
         let (ctx, init) = TestContext::new(temp_dirs.as_temp_paths(), mock_services);
         let service_impl = UpdateManagerServiceImpl::new_with_paths(
             init,
@@ -3827,6 +3896,7 @@ mod tests {
                 .expect_power_state_report_processing_complete()
                 .times(1)
                 .returning(|| Ok(()));
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
 
@@ -3968,6 +4038,8 @@ mod tests {
 
         {
             let mut mock_services = MockServices::new();
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+
             mock_services
                 .apex_service
                 .expect_submit_staged_session()
@@ -4127,7 +4199,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_activate_post_reboot_rollback_complete_system_update_success_recovery() {
+    async fn test_fail_to_mark_boot_complete_activate_post_reboot_rollback_complete_succeeds() {
         let temp_dirs = TempDirs::new();
         let temp_paths = temp_dirs.as_temp_paths();
         let ota_package_path = temp_paths.ota_package.clone();
@@ -4146,6 +4218,8 @@ mod tests {
                 .expect_power_state_report_processing_complete()
                 .times(1)
                 .returning(|| Ok(()));
+
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
             let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -4227,6 +4301,168 @@ mod tests {
                 .times(1)
                 .returning(|_| Ok(()));
 
+            mock_services_post_reboot_activate
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Err(SdvStatus::new(SdvStatusCode::Internal)));
+
+            let (ctx, init) =
+                TestContext::new(temp_paths.clone(), mock_services_post_reboot_activate);
+
+            let service_impl_post_reboot = UpdateManagerServiceImpl::new_with_paths(
+                init,
+                &ota_package_path,
+                &ctx.save_state_path,
+            )
+            .await
+            .unwrap();
+
+            let status_pre_rollback = UpdateManagerService::GetStatus(
+                &service_impl_post_reboot,
+                make_service_fqin(),
+                &GetStatusRequest::default(),
+            )
+            .await
+            .unwrap();
+
+            assert_eq!(
+                status_pre_rollback.update_manager_status.update_state.unwrap(),
+                ApiUpdateState::ACTIVATE_POST_REBOOT_COMPLETE
+            );
+
+            UpdateManagerService::Rollback(
+                &service_impl_post_reboot,
+                make_service_fqin(),
+                &RollbackRequest::default(),
+            )
+            .await
+            .expect("Failure when calling UpdateManagerService::Rollback");
+
+            let status_post_rollback = UpdateManagerService::GetStatus(
+                &service_impl_post_reboot,
+                make_service_fqin(),
+                &GetStatusRequest::default(),
+            )
+            .await
+            .unwrap();
+
+            assert_eq!(
+                status_post_rollback.update_manager_status.update_state.unwrap(),
+                ApiUpdateState::ACTIVATE_POST_REBOOT_ROLLBACK_COMPLETE
+            );
+        } // End of Scope 2
+    }
+
+    #[tokio::test]
+    async fn test_activate_post_reboot_rollback_complete_system_update_success_recovery() {
+        let temp_dirs = TempDirs::new();
+        let temp_paths = temp_dirs.as_temp_paths();
+        let ota_package_path = temp_paths.ota_package.clone();
+
+        // Scope 1: Pre-Reboot Activation
+        {
+            let mut mock_services = MockServices::new();
+            mock_services
+                .boot_control_service
+                .expect_get_current_slot()
+                .times(1)
+                .returning(|| Ok(1));
+
+            mock_services
+                .power_state_client
+                .expect_power_state_report_processing_complete()
+                .times(1)
+                .returning(|| Ok(()));
+
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+
+            let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
+            let service_impl = UpdateManagerServiceImpl::new_with_paths(
+                init,
+                &ota_package_path,
+                &ctx.save_state_path,
+            )
+            .await
+            .unwrap();
+
+            let requested_system_update_payload = make_system_update_payload();
+
+            subscribe_and_wait_for_state(&mut ctx, &service_impl, ApiUpdateState::READY).await;
+
+            UpdateManagerService::Prepare(
+                &service_impl,
+                make_service_fqin(),
+                &PrepareRequest {
+                    payload: Some(PrepareRequestPayload::SystemUpdatePayload(
+                        requested_system_update_payload.clone(),
+                    )),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect("Failure when calling UpdateManagerService::Prepare");
+
+            assert_prepare_success(&mut ctx).await;
+
+            UpdateManagerService::Activate(
+                &service_impl,
+                make_service_fqin(),
+                &ActivateRequest::default(),
+            )
+            .await
+            .expect("Failure when calling UpdateManagerService::Activate");
+
+            wait_for_successful_callback(&mut ctx.callback_receiver, STATE_CHANGE_TIMEOUT).await;
+            wait_for_successful_callback(&mut ctx.callback_receiver, STATE_CHANGE_TIMEOUT).await;
+            wait_for_successful_callback(&mut ctx.callback_receiver, STATE_CHANGE_TIMEOUT).await;
+
+            let status_result = UpdateManagerService::GetStatus(
+                &service_impl,
+                make_service_fqin(),
+                &GetStatusRequest::default(),
+            )
+            .await
+            .unwrap();
+
+            assert_eq!(
+                status_result.update_manager_status.update_state.unwrap(),
+                ApiUpdateState::ACTIVATE_PRE_REBOOT_COMPLETE
+            );
+        }
+        // --- Scope 2: Post-Reboot Activation and Trigger Rollback
+        let ota_package_path = temp_paths.ota_package.clone();
+        {
+            let mut mock_services_post_reboot_activate = MockServices::new();
+
+            // new_slot = 0 (system successfully booted to new slot)
+            mock_services_post_reboot_activate
+                .boot_control_service
+                .expect_get_current_slot()
+                .times(1)
+                .returning(|| Ok(0));
+
+            mock_services_post_reboot_activate
+                .boot_control_service
+                .expect_is_slot_marked_successful()
+                .withf(|&slot| slot == 0)
+                .times(1)
+                .returning(|_| Ok(false));
+
+            // Rollback to initial_slot = 1
+            mock_services_post_reboot_activate
+                .boot_control_service
+                .expect_revert_to_slot()
+                .withf(|&slot| slot == 1)
+                .times(1)
+                .returning(|_| Ok(()));
+
+            mock_services_post_reboot_activate
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Ok(()));
+
             let (ctx, init) =
                 TestContext::new(temp_paths.clone(), mock_services_post_reboot_activate);
 
@@ -4294,6 +4530,12 @@ mod tests {
                 .times(1)
                 .returning(|| Ok(1));
 
+            mock_services_restart
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Ok(()));
+
             let (ctx, init) = TestContext::new(temp_paths.clone(), mock_services_restart);
 
             let service_impl_final = UpdateManagerServiceImpl::new_with_paths(
@@ -4339,6 +4581,8 @@ mod tests {
                 .expect_power_state_report_processing_complete()
                 .times(1)
                 .returning(|| Ok(()));
+
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
             let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -4420,6 +4664,12 @@ mod tests {
                 .withf(|&slot| slot == 1) // Revert to initial slot (1)
                 .times(1)
                 .returning(|_| Ok(()));
+
+            mock_services_post_reboot_activate
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Ok(()));
 
             let (ctx, init) = TestContext::new(
                 temp_paths.clone(), // Use original temp_dirs for ctx creation
@@ -4544,6 +4794,8 @@ mod tests {
                 .times(1)
                 .returning(|| Ok(()));
 
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
             let service_impl = UpdateManagerServiceImpl::new_with_paths(
                 init,
@@ -4623,6 +4875,12 @@ mod tests {
                 .withf(|&slot| slot == 1)
                 .times(1)
                 .returning(|_| Ok(()));
+
+            mock_services_post_reboot_activate
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Ok(()));
 
             let (ctx, init) =
                 TestContext::new(temp_paths.clone(), mock_services_post_reboot_activate);
@@ -4742,6 +5000,8 @@ mod tests {
                 .times(1)
                 .returning(|| Ok(()));
 
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
             let service_impl = UpdateManagerServiceImpl::new_with_paths(
                 init,
@@ -4828,6 +5088,12 @@ mod tests {
                 .withf(|&slot| slot == 1)
                 .times(1)
                 .returning(|_| Ok(()));
+
+            mock_services_post_reboot_activate
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Ok(()));
 
             let (ctx, init) =
                 TestContext::new(temp_paths.clone(), mock_services_post_reboot_activate);
@@ -4958,6 +5224,8 @@ mod tests {
                 .withf(move |retry| *retry == SERVICE_BUNDLE_UPDATE_RETRIES)
                 .returning(|_| Ok(()));
 
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
 
             let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -5049,6 +5317,11 @@ mod tests {
             mock_services_post_reboot_activate
                 .apex_service
                 .expect_revert_active_sessions()
+                .times(1)
+                .returning(|| Ok(()));
+            mock_services_post_reboot_activate
+                .apex_service
+                .expect_mark_boot_successful()
                 .times(1)
                 .returning(|| Ok(()));
 
@@ -5180,6 +5453,8 @@ mod tests {
                 .withf(move |retry| *retry == SERVICE_BUNDLE_UPDATE_RETRIES)
                 .returning(|_| Ok(()));
 
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
+
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
 
             let service_impl = UpdateManagerServiceImpl::new_with_paths(
@@ -5275,6 +5550,11 @@ mod tests {
                 .expect_revert_active_sessions()
                 .times(1)
                 .returning(|| Ok(()));
+            mock_services_post_reboot_activate
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Ok(()));
 
             let (ctx, init) =
                 TestContext::new(temp_paths.clone(), mock_services_post_reboot_activate);
@@ -5340,6 +5620,11 @@ mod tests {
                     Ok(vec![]) // Return an EMPTY vector. This ensures check_submitted_apexes_active returns false.
                 },
             );
+            mock_services_restart
+                .apex_service
+                .expect_mark_boot_successful()
+                .times(1)
+                .returning(|| Ok(()));
 
             let (ctx, init) = TestContext::new(temp_paths.clone(), mock_services_restart);
 
@@ -5383,6 +5668,7 @@ mod tests {
                 .expect_power_state_report_processing_complete()
                 .times(1)
                 .returning(|| Ok(()));
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
 
@@ -5525,6 +5811,7 @@ mod tests {
                 .expect_power_state_report_processing_complete()
                 .times(1)
                 .returning(|| Ok(()));
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
 
@@ -5678,6 +5965,7 @@ mod tests {
                 .expect_power_state_report_processing_complete()
                 .times(1)
                 .returning(|| Ok(()));
+            mock_services.apex_service.expect_mark_boot_successful().times(1).returning(|| Ok(()));
 
             let (mut ctx, init) = TestContext::new(temp_paths.clone(), mock_services);
 

@@ -20,31 +20,25 @@
 
 # ACL that defines the UpdateManagerAgent
 acls {
-  name : "update-manager-agent-acl"
-  include : "com.sdv.google.update_manager.UpdateManagerAgent"
+  name: "update-manager-agent-acl"
+  include: "com.sdv.google.update_manager.UpdateManagerAgent"
 }
 
 # ACL that defines the sample UpdateManagerClient
 acls {
-  name : "update-manager-client-acl"
-  include : "com.sdv.google.sample.update_manager.client.UpdateManagerClient"
+  name: "update-manager-client-acl"
+  include: "com.sdv.google.sample.update_manager.client.UpdateManagerClient"
 }
 
 # The UpdateManagerAgent can implement the UpdateManagerService RPC interface
-unit_types {
-  name : "UpdateManagerService"
-  acl_names : "update-manager-agent-acl"
-}
+unit_types { name: "UpdateManagerService" acl_names: "update-manager-agent-acl" }
 
 # Clients of the UpdateManagerService must implement the
 # UpdateManagerListenerService RPC interface
-unit_types {
-  name : "client.UpdateManagerListenerService"
-  acl_names : "update-manager-client-acl"
-}
+unit_types { name: "client.UpdateManagerListenerService" acl_names: "update-manager-client-acl" }
 
 # Clients should be allowed to use the UpdateManagerService RPC interface
 service_units {
-  name : "com-sdv-google-update-manager-update-manager-service"
-  acl_names : "update-manager-client-acl"
+  name: "com-sdv-google-update-manager-update-manager-service"
+  acl_names: "update-manager-client-acl"
 }

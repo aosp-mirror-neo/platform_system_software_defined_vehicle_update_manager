@@ -21,15 +21,15 @@
 # should not be referneces in this manifest.
 sdv_service_bundle_metadata {
   # Update manager agent name.
-  name : "UpdateManagerAgent"
-  version_number : 1
-  version_name : "1"
+  name: "UpdateManagerAgent"
+  version_number: 1
+  version_name: "1"
 
   # Reference the manifest itself to mark matadata as a config-only declaration.
   # Update Manager is started by init and not expected to be visible to SDV
   # Orchestration.
-  native_library_path : "etc/sdv_service_bundles_manifest.textproto"
+  native_library_path: "etc/sdv_service_bundles_manifest.textproto"
 
   # Path to the Update Manger agent ACLs policy file.
-  access_control_list_policy_path : "etc/acl.textproto"
+  access_control_list_policy_path: "etc/acl.textproto"
 }

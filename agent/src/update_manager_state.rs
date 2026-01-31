@@ -409,6 +409,22 @@ impl UpdateManagerState for Ready {
             )),
         }
     }
+
+    async fn on_enter(&self, env: Arc<UpdateManagerEnvironment>) -> Option<UpdateManagerEvent> {
+        let result = env.apex_service.mark_boot_successful().await;
+
+        if let Err(e) = result {
+            // TODO b/382312003 determine if there is a better way to log non-critical failures
+            // This is not a critical failure. This function is mostly used to ensure the
+            // ApexService session directories are cleaned up after an update. The APEXes will still
+            // activate on each boot without this succeeding.
+            warn!(
+                "Failed to indicate to ApexService that the boot was successful, updated APEXes will still be activated: {e:?}",
+            );
+        }
+
+        None
+    }
 }
 
 #[derive(Clone)]
@@ -1145,20 +1161,6 @@ impl UpdateManagerState for Commit {
             error!("Failed to commit: {:?}", e.to_string());
         }
 
-        if let UpdateMetadata::ServiceBundle(_) = &self.metadata {
-            let result = env.apex_service.mark_boot_successful().await;
-
-            if let Err(e) = result {
-                // TODO b/382312003 determine if there is a better way to log non-critical failures
-                // This is not a critical failure. This function is mostly used to ensure the
-                // ApexService session directories are cleaned up after an update. The APEXes will still
-                // activate on each boot without this succeeding.
-                warn!(
-                    "Failed to indicate to ApexService that the boot was successful, updated APEXes will still be activated: {e:?}",
-                );
-            }
-        }
-
         Some(UpdateManagerEvent::CommitComplete)
     }
 }
@@ -1513,6 +1515,22 @@ impl UpdateManagerState for ActivatePostRebootRollbackComplete {
                 format!("State {:?} does not expect {:?}", self.value(), event),
             )),
         }
+    }
+
+    async fn on_enter(&self, env: Arc<UpdateManagerEnvironment>) -> Option<UpdateManagerEvent> {
+        let result = env.apex_service.mark_boot_successful().await;
+
+        if let Err(e) = result {
+            // TODO b/382312003 determine if there is a better way to log non-critical failures
+            // This is not a critical failure. This function is mostly used to ensure the
+            // ApexService session directories are cleaned up after an update. The APEXes will still
+            // activate on each boot without this succeeding.
+            warn!(
+                "Failed to indicate to ApexService that the boot was successful, updated APEXes will still be activated: {e:?}",
+            );
+        }
+
+        None
     }
 
     async fn on_recovery(&self, env: Arc<UpdateManagerEnvironment>) -> Option<UpdateManagerEvent> {

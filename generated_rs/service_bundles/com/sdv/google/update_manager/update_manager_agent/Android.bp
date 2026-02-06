@@ -32,9 +32,11 @@ genrule {
 rust_library {
     name: "libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent",
     crate_name: "sdv_mw_rs_com_sdv_google_update_manager_update_manager_agent",
+    crate_root: ":libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent_rs{service_bundle.rs}",
     srcs: [
-        ":libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent_rs{service_bundle.rs}",
+        ":libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent_rs",
     ],
+    use_expansive_default_srcs: false,
     rustlibs: [
         "libprotobuf",
         "liblog_rust",

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 # proto-file:
-# //system/software_defined_vehicle/middleware/service_authz/proto/sdv/authz/policy/acl_policy.proto
-# proto-message: AclPolicy
+# //system/software_defined_vehicle/middleware/service_authz/proto/sdv/authz/policy/authz_policy.proto
+# proto-message: AuthzPolicy
 
 # ACL policies for Update Manager Agent Unit Types.
 

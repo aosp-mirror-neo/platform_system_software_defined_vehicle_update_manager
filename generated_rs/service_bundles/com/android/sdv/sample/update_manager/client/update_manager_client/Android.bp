@@ -20,21 +20,21 @@ package {
 }
 
 genrule {
-    name: "libsdv_mw_rs_com_sdv_google_sample_update_manager_client_update_manager_client_rs",
+    name: "libsdv_mw_rs_com_android_sdv_sample_update_manager_client_update_manager_client_rs",
     tools: ["extract_catalog_zip"],
     srcs: [":vsidlc_update_manager_v1_catalog_files"],
     out: [
         "service_bundle.rs",
     ],
-    cmd: "$(location extract_catalog_zip) $(in) --service-bundle com.sdv.google.sample.update_manager.client UpdateManagerClient",
+    cmd: "$(location extract_catalog_zip) $(in) --service-bundle com.android.sdv.sample.update_manager.client UpdateManagerClient",
 }
 
 rust_library {
-    name: "libsdv_mw_rs_com_sdv_google_sample_update_manager_client_update_manager_client",
-    crate_name: "sdv_mw_rs_com_sdv_google_sample_update_manager_client_update_manager_client",
-    crate_root: ":libsdv_mw_rs_com_sdv_google_sample_update_manager_client_update_manager_client_rs{service_bundle.rs}",
+    name: "libsdv_mw_rs_com_android_sdv_sample_update_manager_client_update_manager_client",
+    crate_name: "sdv_mw_rs_com_android_sdv_sample_update_manager_client_update_manager_client",
+    crate_root: ":libsdv_mw_rs_com_android_sdv_sample_update_manager_client_update_manager_client_rs{service_bundle.rs}",
     srcs: [
-        ":libsdv_mw_rs_com_sdv_google_sample_update_manager_client_update_manager_client_rs",
+        ":libsdv_mw_rs_com_android_sdv_sample_update_manager_client_update_manager_client_rs",
     ],
     use_expansive_default_srcs: false,
     rustlibs: [

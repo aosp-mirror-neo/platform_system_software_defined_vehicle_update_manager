@@ -27,7 +27,7 @@ acls {
 # ACL that defines the sample UpdateManagerClient
 acls {
   name: "update-manager-client-acl"
-  include: "com.sdv.google.sample.update_manager.client.UpdateManagerClient"
+  include: "com.android.sdv.sample.update_manager.client.UpdateManagerClient"
 }
 
 # The UpdateManagerAgent can implement the UpdateManagerService RPC interface

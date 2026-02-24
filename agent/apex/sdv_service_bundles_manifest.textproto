@@ -31,5 +31,5 @@ sdv_service_bundle_metadata {
   native_library_path: "etc/sdv_service_bundles_manifest.textproto"
 
   # Path to the Update Manger agent ACLs policy file.
-  access_control_list_policy_path: "etc/acl.textproto"
+  authorization_policy_path: "etc/acl.textproto"
 }

@@ -20,18 +20,18 @@ package {
 }
 
 genrule {
-    name: "libcom_sdv_google_update_manager_update_manager_service_rpc_rs_src",
+    name: "libcom_android_sdv_update_manager_client_update_manager_listener_service_rpc_rs_src",
     tools: ["extract_catalog_zip"],
     srcs: [":vsidlc_update_manager_v1_catalog_files"],
     out: ["lib.rs"],
-    cmd: "$(location extract_catalog_zip) $(in) --rpc com.sdv.google.update_manager UpdateManagerService",
+    cmd: "$(location extract_catalog_zip) $(in) --rpc com.android.sdv.update_manager.client UpdateManagerListenerService",
 }
 
 rust_library {
-    name: "libcom_sdv_google_update_manager_update_manager_service_rpc_rs",
-    crate_name: "com_sdv_google_update_manager_update_manager_service_rpc",
+    name: "libcom_android_sdv_update_manager_client_update_manager_listener_service_rpc_rs",
+    crate_name: "com_android_sdv_update_manager_client_update_manager_listener_service_rpc",
     srcs: [
-        ":libcom_sdv_google_update_manager_update_manager_service_rpc_rs_src",
+        ":libcom_android_sdv_update_manager_client_update_manager_listener_service_rpc_rs_src",
     ],
     rustlibs: [
         "libsdv_rs",

@@ -36,7 +36,7 @@ use boot_control_service::BinderBootControlService;
 use log::{debug, error};
 use sdv_comms::id::ServiceFqin;
 use sdv_comms::ContextRef;
-use sdv_mw_rs_com_sdv_google_update_manager_update_manager_agent::UpdateManagerAgent;
+use sdv_mw_rs_com_android_sdv_update_manager_update_manager_agent::UpdateManagerAgent;
 use sdv_mw_rs_sdv_comms::SdvComms;
 use sdv_status_rs::SdvResult;
 use std::path::Path;
@@ -59,7 +59,7 @@ async fn run() -> SdvResult<()> {
 
     let fqin = ServiceFqin::builder()
         .sdv_vm_name("vm")
-        .sdv_package_name("com.sdv.google.update_manager")
+        .sdv_package_name("com.android.sdv.update_manager")
         .service_bundle_name("UpdateManagerAgent")
         .service_instance_name("default")
         .build()?;

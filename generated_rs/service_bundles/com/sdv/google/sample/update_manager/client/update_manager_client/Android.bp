@@ -42,8 +42,8 @@ rust_library {
         "liblog_rust",
         "libsdv_rs",
         "libfutures",
-        "libcom_sdv_google_update_manager_client_update_manager_listener_service_rpc_rs",
-        "libcom_sdv_google_update_manager_update_manager_service_rpc_rs",
+        "libcom_android_sdv_update_manager_client_update_manager_listener_service_rpc_rs",
+        "libcom_android_sdv_update_manager_update_manager_service_rpc_rs",
     ],
     apex_available: [
         "//apex_available:platform",

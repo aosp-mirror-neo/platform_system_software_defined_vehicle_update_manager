@@ -15,7 +15,7 @@
  */
 
 use async_trait::async_trait;
-use com_sdv_google_update_manager_client_update_manager_listener_service_rpc::Client as UpdateManagerListenerServiceClient;
+use com_android_sdv_update_manager_client_update_manager_listener_service_rpc::Client as UpdateManagerListenerServiceClient;
 use log::debug;
 use mockall::automock;
 use sdv_mw_rs_comms::{

@@ -17,29 +17,29 @@ package {
 }
 
 apex {
-    name: "com.sdv.google.update_manager",
+    name: "com.android.sdv.update_manager",
     manifest: "apex_manifest.json",
-    key: "com.sdv.google.update_manager.key",
+    key: "com.android.sdv.update_manager.key",
     file_contexts: "file_contexts",
     prebuilts: [
         // SDV service bundles manifest file.
-        "com.sdv.google.update_manager.manifest",
+        "com.android.sdv.update_manager.manifest",
         // Update manager ACL policy file.
-        "com.sdv.google.update_manager.acl_policy",
+        "com.android.sdv.update_manager.acl_policy",
     ],
     system_ext_specific: true,
     updatable: false,
 }
 
 apex_key {
-    name: "com.sdv.google.update_manager.key",
-    public_key: "com.sdv.google.update_manager.avbpubkey",
-    private_key: "com.sdv.google.update_manager.pem",
+    name: "com.android.sdv.update_manager.key",
+    public_key: "com.android.sdv.update_manager.avbpubkey",
+    private_key: "com.android.sdv.update_manager.pem",
 }
 
 // Update manager SDV service bundles manifest file prebuilt.
 prebuilt_etc {
-    name: "com.sdv.google.update_manager.manifest",
+    name: "com.android.sdv.update_manager.manifest",
     // The source name of the manifest file.
     src: "sdv_service_bundles_manifest.textproto",
     // The name of the installed file shall be `sdv_service_bundles_manifest.textproto`.
@@ -53,7 +53,7 @@ prebuilt_etc {
 
 // File with the ACL policy of service bundle is stored in the apex.
 prebuilt_etc {
-    name: "com.sdv.google.update_manager.acl_policy",
+    name: "com.android.sdv.update_manager.acl_policy",
     // The source name of the manifest file.
     src: "acl.textproto",
     filename: "acl.textproto",

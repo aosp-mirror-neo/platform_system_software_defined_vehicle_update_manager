@@ -21,10 +21,10 @@ service_bundle {
     name: "UpdateManagerClient"
 
     client {
-        service: "com.sdv.google.update_manager.UpdateManagerService"
+        service: "com.android.sdv.update_manager.UpdateManagerService"
     }
 
     server {
-        service: "com.sdv.google.update_manager.client.UpdateManagerListenerService"
+        service: "com.android.sdv.update_manager.client.UpdateManagerListenerService"
     }
 }

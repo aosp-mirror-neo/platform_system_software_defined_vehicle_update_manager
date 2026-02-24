@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package com.sdv.google.update_manager.client;
+package com.android.sdv.update_manager.client;
 
 import "update_manager_status.proto";
 

@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package com.sdv.google.update_manager;
+package com.android.sdv.update_manager;
 
 import "failure_reason.proto";
 import "update_state.proto";

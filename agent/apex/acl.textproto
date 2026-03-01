@@ -21,13 +21,13 @@
 # ACL that defines the UpdateManagerAgent
 acls {
   name: "update-manager-agent-acl"
-  include: "com.sdv.google.update_manager.UpdateManagerAgent"
+  include: "com.android.sdv.update_manager.UpdateManagerAgent"
 }
 
 # ACL that defines the sample UpdateManagerClient
 acls {
   name: "update-manager-client-acl"
-  include: "com.sdv.google.sample.update_manager.client.UpdateManagerClient"
+  include: "com.android.sdv.sample.update_manager.client.UpdateManagerClient"
 }
 
 # The UpdateManagerAgent can implement the UpdateManagerService RPC interface
@@ -39,6 +39,6 @@ unit_types { name: "client.UpdateManagerListenerService" acl_names: "update-mana
 
 # Clients should be allowed to use the UpdateManagerService RPC interface
 service_units {
-  name: "com-sdv-google-update-manager-update-manager-service"
+  name: "com-android-sdv-update-manager-update-manager-service"
   acl_names: "update-manager-client-acl"
 }

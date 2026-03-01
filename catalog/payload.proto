@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package com.sdv.google.update_manager;
+package com.android.sdv.update_manager;
 
 message SystemUpdatePayload {
   /* Absolute path to the update image (eg. /updates/ota_update.zip) */

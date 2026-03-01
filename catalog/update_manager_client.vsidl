@@ -15,16 +15,16 @@
 # proto-file: //system/software_defined_vehicle/core_services/vsidl/syntax/vsidl.proto
 # proto-message: VsidlEntry
 
-package: "com.sdv.google.sample.update_manager.client"
+package: "com.android.sdv.sample.update_manager.client"
 
 service_bundle {
     name: "UpdateManagerClient"
 
     client {
-        service: "com.sdv.google.update_manager.UpdateManagerService"
+        service: "com.android.sdv.update_manager.UpdateManagerService"
     }
 
     server {
-        service: "com.sdv.google.update_manager.client.UpdateManagerListenerService"
+        service: "com.android.sdv.update_manager.client.UpdateManagerListenerService"
     }
 }

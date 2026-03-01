@@ -20,30 +20,25 @@ package {
 }
 
 genrule {
-    name: "libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent_rs",
+    name: "libcom_android_sdv_update_manager_client_update_manager_listener_service_rpc_rs_src",
     tools: ["extract_catalog_zip"],
     srcs: [":vsidlc_update_manager_v1_catalog_files"],
-    out: [
-        "service_bundle.rs",
-    ],
-    cmd: "$(location extract_catalog_zip) $(in) --service-bundle com.sdv.google.update_manager UpdateManagerAgent",
+    out: ["lib.rs"],
+    cmd: "$(location extract_catalog_zip) $(in) --rpc com.android.sdv.update_manager.client UpdateManagerListenerService",
 }
 
 rust_library {
-    name: "libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent",
-    crate_name: "sdv_mw_rs_com_sdv_google_update_manager_update_manager_agent",
-    crate_root: ":libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent_rs{service_bundle.rs}",
+    name: "libcom_android_sdv_update_manager_client_update_manager_listener_service_rpc_rs",
+    crate_name: "com_android_sdv_update_manager_client_update_manager_listener_service_rpc",
     srcs: [
-        ":libsdv_mw_rs_com_sdv_google_update_manager_update_manager_agent_rs",
+        ":libcom_android_sdv_update_manager_client_update_manager_listener_service_rpc_rs_src",
     ],
-    use_expansive_default_srcs: false,
     rustlibs: [
-        "libprotobuf",
-        "liblog_rust",
         "libsdv_rs",
-        "libfutures",
-        "libcom_sdv_google_update_manager_update_manager_service_rpc_rs",
-        "libcom_sdv_google_update_manager_client_update_manager_listener_service_rpc_rs",
+        "libupdate_manager_api",
+    ],
+    proc_macros: [
+        "libasync_trait",
     ],
     apex_available: [
         "//apex_available:platform",

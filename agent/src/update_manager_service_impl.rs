@@ -31,7 +31,7 @@ use crate::vold::VoldService;
 use crate::vpm::PowerStateClient;
 use crate::vsidl_update_manager_listener_service_client_provider::UpdateManagerListenerServiceClientProvider;
 use async_trait::async_trait;
-use com_sdv_google_update_manager_update_manager_service_rpc::Interface as UpdateManagerService;
+use com_android_sdv_update_manager_update_manager_service_rpc::Interface as UpdateManagerService;
 use google_sdv_vpm::aidl::google::sdv::vpm::PowerStateReport::PowerStateReport;
 use log::{debug, error};
 use protobuf::MessageField;

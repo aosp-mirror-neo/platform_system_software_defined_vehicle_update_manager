@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package com.sdv.google.update_manager;
+package com.android.sdv.update_manager;
 enum UpdateState {
   /* The Update Manager is ready to accept a new update. */
   READY = 0;

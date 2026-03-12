@@ -42,3 +42,10 @@ service_units {
   name: "com-android-sdv-update-manager-update-manager-service"
   acl_names: "update-manager-client-acl"
 }
+
+# Permissions
+
+server {
+  service: "com.android.sdv.update_manager.UpdateManagerService"
+  channel: "com-android-sdv-update-manager-update-manager-service"
+}

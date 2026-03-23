@@ -49,3 +49,8 @@ server {
   service: "com.android.sdv.update_manager.UpdateManagerService"
   channel: "com-android-sdv-update-manager-update-manager-service"
 }
+
+client {
+  service: "com.android.sdv.update_manager.client.UpdateManagerListenerService"
+  channel: "com-android-sdv-update-manager-client-update-manager-listener-service"
+}

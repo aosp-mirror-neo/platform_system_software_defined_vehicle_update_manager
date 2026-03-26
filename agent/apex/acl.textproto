@@ -16,33 +16,6 @@
 # //system/software_defined_vehicle/middleware/service_authz/proto/sdv/authz/policy/authz_policy.proto
 # proto-message: AuthzPolicy
 
-# ACL policies for Update Manager Agent Unit Types.
-
-# ACL that defines the UpdateManagerAgent
-acls {
-  name: "update-manager-agent-acl"
-  include: "com.android.sdv.update_manager.UpdateManagerAgent"
-}
-
-# ACL that defines the sample UpdateManagerClient
-acls {
-  name: "update-manager-client-acl"
-  include: "com.android.sdv.sample.update_manager.client.UpdateManagerClient"
-}
-
-# The UpdateManagerAgent can implement the UpdateManagerService RPC interface
-unit_types { name: "UpdateManagerService" acl_names: "update-manager-agent-acl" }
-
-# Clients of the UpdateManagerService must implement the
-# UpdateManagerListenerService RPC interface
-unit_types { name: "client.UpdateManagerListenerService" acl_names: "update-manager-client-acl" }
-
-# Clients should be allowed to use the UpdateManagerService RPC interface
-service_units {
-  name: "com-android-sdv-update-manager-update-manager-service"
-  acl_names: "update-manager-client-acl"
-}
-
 # Permissions
 
 server {

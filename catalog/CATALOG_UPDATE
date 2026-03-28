@@ -17,4 +17,4 @@
 # This is the catalog update file for the SDV Update Manager
 
 output_path: ".."
-vsidlc_gen_args: "--genrule"
+vsidlc_gen_args: "--genrule --target-api pdk29"

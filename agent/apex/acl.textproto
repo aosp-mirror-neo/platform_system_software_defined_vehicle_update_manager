@@ -25,5 +25,5 @@ server {
 
 client {
   service: "com.android.sdv.update_manager.client.UpdateManagerListenerService"
-  channel: "com-android-sdv-update-manager-client-update-manager-listener-service"
+  allow_all_channels: true
 }
